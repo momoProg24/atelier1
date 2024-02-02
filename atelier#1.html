@@ -1,0 +1,104 @@
+<div id="graph" width="1000" height="600"></div>
+
+<script defer>
+    const svgns = "http://www.w3.org/2000/svg";
+    let viewPortMaxUnitX = 1500;
+    let viewPortMaxUnitY = 1000;
+    let viewport = null;
+    initUI();
+
+    function initUI() {
+        insertViewPort("graph");
+        graphique();
+    }
+
+    // Insérer la vue SVG
+    function insertViewPort(containerId) {
+        viewport = document.createElementNS(svgns, "svg");
+        viewport.setAttribute("id", "viewport");
+        viewport.setAttribute("viewBox", "0 0 " + viewPortMaxUnitX + " " + viewPortMaxUnitY);
+        document.getElementById(containerId).appendChild(viewport);
+    }
+
+    // Fonction principale pour dessiner le graphique
+    function graphique() {
+        // Données 
+        let mois = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+        let ventes = [6500, 5550, 4200, 4525, 2500, 1500, 500, 1000, 1750, 2300, 3700, 3500];
+
+        gererTitre(0.5 * viewPortMaxUnitX, 0.05 * viewPortMaxUnitY, 'Ventes 2023', 3); // Placer le titre au milieu en hauteur
+
+        for (let i = 0; i < 71; i++) {
+            const grilleX = 180;
+            const grilleY = (10 * i) + 200;
+
+            if (i % 10 === 0) // Si l'index est un multiple de 10 dessiner une ligne noire 
+            {
+                ajoutLigneGraph(grilleX, grilleY, 900, grilleY, "black", 2);
+                ajoutValeurBarre((i === 70) ? 155 : 130, grilleY, `$ ${(70 - i) * 100}`, 1);
+            } else {
+                ajoutLigneGraph(grilleX, grilleY, 900, grilleY, "gray", 1);
+            }
+        }
+
+        for (let i = 0; i < mois.length; i++) {
+            const barColor = getColor(ventes[i]);
+
+            viewport.appendChild(text((i * 60.5) + 190, 925, `${mois[i]}`, 1, "black", 45)); // Mois
+            viewport.appendChild(text((i * 60.5) + 190, 895 - (((ventes[i] / 100) * 10)), `$${ventes[i]}`, 1, "black", 0)); // $ valeur des ventes par mois
+            viewport.appendChild(barreGraphique((i * 60.5) + 190, 900 - (((ventes[i] / 100) * 10)), 40, (((ventes[i] / 100)) * 10), barColor, "black", 1)); // Barre qui représente les ventes par mois
+        }
+    }
+
+    // Fonction pour ajouter une ligne au graphique
+    function ajoutLigneGraph(x1, y1, x2, y2, couleur = "black", largeurTrait = 1) {
+        viewport.appendChild(LigneGraphique(x1, y1, x2, y2, couleur, largeurTrait));
+    }
+
+    // Fonction pour ajouter la valeur en haut des barres
+    function ajoutValeurBarre(x, y, contenuTexte, taillePolice) { 
+        viewport.appendChild(text(x, y, contenuTexte, taillePolice, "black", 0));
+    }
+
+    // Fonction pour gérer le titre du graphique
+    function gererTitre(x, y, label, fontSize) {
+        viewport.appendChild(text(x, y, label, fontSize, "black", 0)).setAttribute("text-anchor", "middle"); 
+    }
+
+    // Fonction pour créer une ligne SVG
+    function LigneGraphique(x1, y1, x2, y2, stroke = "black", strokeWidth = 1) {
+        let ligne = document.createElementNS(svgns, "line");
+        ligne.setAttribute("x1", x1); ligne.setAttribute("y1", y1);
+        ligne.setAttribute("x2", x2); ligne.setAttribute("y2", y2);
+        ligne.setAttribute("stroke", stroke);
+        ligne.setAttribute("stroke-width", strokeWidth);
+        return ligne;
+    }
+
+    function barreGraphique(x, y, width, height, fill = "white", stroke = "black", strokeWidth = 1) {
+        let barre = document.createElementNS(svgns, "rect");
+        barre.setAttribute("x", x); barre.setAttribute("y", y);
+        barre.setAttribute("width", width); barre.setAttribute("height", height);
+        barre.setAttribute("fill", fill); barre.setAttribute("stroke", stroke);
+        barre.setAttribute("stroke-width", strokeWidth);
+        return barre;
+    }
+
+    function text(x, y, content, size = "1", fill = "black", angle) {
+        let text = document.createElementNS(svgns, "text");
+        text.setAttribute("x", x); text.setAttribute("y", y);
+        text.setAttribute("transform", `rotate(${angle},${x},${y})`);
+        text.setAttribute("font-size", size + "em");
+        text.setAttribute("fill", fill);
+        text.innerHTML = content;
+        return text;
+    }
+
+    // Fonction pour déterminer la couleur en fonction de la valeur
+    function getColor(value) {
+        if (value > 4500) return 'green';
+        else if (value > 3000) return 'yellow';
+        else if (value > 1000) return 'orange';
+        else return 'red';
+    }
+</script>
